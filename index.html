@@ -54,22 +54,6 @@
             outline: none;
         }
         .search-box:focus { border-color: #0f3460; }
-        .filter-btns { display: flex; gap: 0.4rem; }
-        .filter-btn {
-            padding: 0.5rem 1rem;
-            border: 2px solid #e0e0e0;
-            background: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-        }
-        .filter-btn:hover { border-color: #0f3460; }
-        .filter-btn.active {
-            background: #0f3460;
-            color: white;
-            border-color: #0f3460;
-        }
         .stats {
             width: 100%;
             font-size: 0.85rem;
@@ -87,8 +71,7 @@
             border-left: 4px solid transparent;
             transition: border-color 0.2s;
         }
-        .ref-item.en { border-left-color: #3498db; }
-        .ref-item.cn { border-left-color: #e74c3c; }
+        .ref-item { border-left-color: #3498db; }
         .ref-item mark {
             background: #fff3cd;
             padding: 0 2px;
@@ -100,17 +83,6 @@
             color: #aaa;
             font-size: 1.1rem;
         }
-        .badge {
-            display: inline-block;
-            font-size: 0.75rem;
-            padding: 0.15rem 0.5rem;
-            border-radius: 4px;
-            margin-right: 0.5rem;
-            font-weight: 600;
-            vertical-align: middle;
-        }
-        .badge.en { background: #ebf5fb; color: #2980b9; }
-        .badge.cn { background: #fdedec; color: #c0392b; }
         @media (max-width: 600px) {
             header { padding: 2rem 1rem 1.5rem; }
             header h1 { font-size: 1.6rem; }
@@ -126,11 +98,6 @@
     <div class="container">
         <div class="controls">
             <input type="text" class="search-box" id="search" placeholder="搜索作者、标题、期刊...">
-            <div class="filter-btns">
-                <button class="filter-btn active" data-filter="all">全部</button>
-                <button class="filter-btn" data-filter="en">English</button>
-                <button class="filter-btn" data-filter="cn">中文</button>
-            </div>
             <div class="stats" id="stats"></div>
         </div>
         <ul class="ref-list" id="list"></ul>
@@ -144,7 +111,6 @@
 
         document.getElementById('total').textContent = allRefs.length;
 
-        let currentFilter = 'all';
         const searchInput = document.getElementById('search');
         const listEl = document.getElementById('list');
         const statsEl = document.getElementById('stats');
@@ -163,9 +129,6 @@
         function render() {
             const q = searchInput.value.trim().toLowerCase();
             let filtered = allRefs;
-            if (currentFilter !== 'all') {
-                filtered = filtered.filter(r => r.lang === currentFilter);
-            }
             if (q) {
                 filtered = filtered.filter(r => r.text.toLowerCase().includes(q));
             }
@@ -174,23 +137,12 @@
                 listEl.innerHTML = '<div class="no-results">没有找到匹配的文献</div>';
                 return;
             }
-            listEl.innerHTML = filtered.map(r => {
-                const badge = r.lang === 'en'
-                    ? '<span class="badge en">EN</span>'
-                    : '<span class="badge cn">中</span>';
-                return `<li class="ref-item ${r.lang}">${badge}${highlightText(r.text, searchInput.value.trim())}</li>`;
-            }).join('');
+            listEl.innerHTML = filtered.map(r =>
+                `<li class="ref-item">${highlightText(r.text, searchInput.value.trim())}</li>`
+            ).join('');
         }
 
         searchInput.addEventListener('input', render);
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelector('.filter-btn.active').classList.remove('active');
-                btn.classList.add('active');
-                currentFilter = btn.dataset.filter;
-                render();
-            });
-        });
         render();
     </script>
 </body>
